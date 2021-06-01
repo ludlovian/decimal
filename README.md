@@ -5,6 +5,10 @@ Simple barebones decimal library
 
 Just because all the others do far more than I need.
 
+All I want is something to manage my financial data, without losing
+pennies in rounding, or requiring me to multiply & divide by 100 all
+the time. That's it.
+
 ## API
 
 ### decimal(input, { minPrecision, maxPrecision }) => Decimal

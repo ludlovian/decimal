@@ -28,8 +28,11 @@ The `decimal` function can take an existing decimal (which it just returns), or
 can create one from a primitive number, or a string representation,
 or a tuple of `[digits, exponent]`.
 
-This is limited to exponents between 0 and 12 inclusive. I suppose it could be extended, but
-who needs more than that?
+This is limited to exponents between 0 and 12 inclusive, error checking
+is minimal and we do not cope with very large or very small numbers.
+
+But by the time my finances are either that large or that small,
+I'll have other problems.
 
 ### .number => number
 

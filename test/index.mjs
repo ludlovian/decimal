@@ -49,6 +49,8 @@ test('errors in construction', () => {
   assert.throws(() => decimal({ foo: 'bar' }))
   assert.throws(() => decimal('foo'))
   assert.throws(() => decimal('789foo'))
+  assert.throws(() => decimal(1e21))
+  assert.throws(() => decimal(1e-10))
 
   assert.throws(() => decimal('0.123456789123456', { maxPrecision: 15 }))
   assert.throws(() => decimal(12.34).precision(15))
@@ -59,6 +61,7 @@ test('representation', () => {
 
   assert.is(x.number, 12.34)
   assert.is(x.toString(), '12.340')
+  assert.is(x.neg().toString(), '-12.340')
   assert.is(x.toJSON(), x.toString())
 
   assert.is(inspect(x), 'Decimal { 12.340 }')

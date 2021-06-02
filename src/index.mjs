@@ -41,7 +41,13 @@ class Decimal {
   }
 
   toString () {
-    return this.number.toFixed(this[EXP])
+    const neg = this[DIG] < 0
+    const e = this[EXP]
+    let s = Math.abs(this[DIG])
+      .toString()
+      .padStart(e + 1, '0')
+    if (e) s = s.slice(0, -e) + '.' + s.slice(-e)
+    return neg ? '-' + s : s
   }
 
   toJSON () {
@@ -95,15 +101,15 @@ class Decimal {
 const rgx = /^-?\d+(?:\.\d+)?$/
 function parseNumber (n, minp, maxp) {
   let s
-  if (typeof n === 'string') {
-    s = n
-    if (!rgx.test(s)) throw new TypeError('Invalid number: ' + s)
-    n = parseFloat(s)
-  } else if (typeof n === 'number') {
+  if (typeof n === 'number') {
     s = n.toString()
+  } else if (typeof n === 'string') {
+    s = n
+    n = parseFloat(s)
   } else {
     throw new TypeError('Invalid number: ' + n)
   }
+  if (!rgx.test(s)) throw new TypeError('Invalid number: ' + s)
   const p = Math.min(Math.max((s.split('.')[1] || '').length, minp), maxp)
   if (!(p in factors)) throw new TypeError('Unsupported precision')
   const d = Math.round(n * factors[p])

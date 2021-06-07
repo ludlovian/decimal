@@ -16,6 +16,10 @@ test('construction', () => {
 
   assert.is(decimal('12.34').toString(), '12.34', 'min precision from string')
 
+  assert.is(decimal(123n).toString(), '123', 'created from bigint')
+
+  assert.is(decimal(123).toString(), '123', 'created from integer')
+
   const x = decimal(12.34)
   assert.is(decimal(x), x, 'pre-converted passed thru')
 })
@@ -33,7 +37,6 @@ test('errors in construction', () => {
   assert.throws(() => decimal({ foo: 'bar' }))
   assert.throws(() => decimal('foo'))
   assert.throws(() => decimal('789foo'))
-  assert.throws(() => decimal(1e21))
   assert.throws(() => decimal(1e-10))
 })
 

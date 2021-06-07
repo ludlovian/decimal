@@ -10,11 +10,24 @@ const div = (x, y) => {
   const n = x / y + (r * 2n >= y ? 1n : 0n)
   return s ? n : -n
 }
+const rgxNumber = /^-?\d+(?:\.\d+)?$/
 
-export default function decimal (number, opts = {}) {
-  if (number instanceof Decimal) return number
-  const [d, p] = parseNumber(number)
-  return new Decimal(d, p)
+export default function decimal (x, opts = {}) {
+  if (x instanceof Decimal) return x
+  if (typeof x === 'bigint') return new Decimal(x, 0)
+  if (typeof x === 'number') {
+    if (Number.isInteger(x)) return new Decimal(BigInt(x), 0)
+    x = x.toString()
+  }
+  if (typeof x !== 'string') throw new TypeError('Invalid number: ' + x)
+  if (!rgxNumber.test(x)) throw new TypeError('Invalid number: ' + x)
+  const i = x.indexOf('.')
+  if (i > -1) {
+    x = x.replace('.', '')
+    return new Decimal(BigInt(x), x.length - i)
+  } else {
+    return new Decimal(BigInt(x), 0)
+  }
 }
 
 decimal.isDecimal = function isDecimal (d) {
@@ -126,22 +139,4 @@ const factors = []
 function getFactor (n) {
   n = Math.floor(n)
   return n in factors ? factors[n] : (factors[n] = 10n ** BigInt(n))
-}
-
-const rgx = /^-?\d+(?:\.\d+)?$/
-function parseNumber (x) {
-  if (typeof x === 'number') {
-    x = x.toString()
-    if (!rgx.test(x)) throw new TypeError('Invalid number: ' + x)
-  }
-  if (typeof x === 'string') {
-    const i = x.indexOf('.')
-    if (i > -1) {
-      x = x.replace('.', '')
-      return [BigInt(x), x.length - i]
-    } else {
-      return [BigInt(x), 0]
-    }
-  }
-  throw new TypeError('Invalid number: ' + x)
 }

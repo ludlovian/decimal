@@ -24,19 +24,21 @@ The sole default export is a function to create a decimal.
 
 A decimal is effectively an immutable integer scaled by 10^-precision.
 So it is represented by two items:
-a`BigInt` for the integer, and a number for the precision.
+a signed `BigInt` for the integer, and a number for the precision.
 
-So `1.23` would be stored as `[123n, 2]` and `1.230` (same number, different
-precision) would be stored as `[1230n, 3]`.
+So `1.23` would be stored as `123n` and `2` and `1.230` (same number, different
+precision) would be stored as `1230n` and `3`.
 
 You can create a decimal by supplying:
 - an existing decimal (which is just returned)
-- a string representation - which is the preferred way to store & retrieve them.
-- an existing primitive number
-- tuple of `[digits, precision]` if you want to fiddle.
+- a string representation - which is the preferred way to store & retrieve them
+- a `bigint`
+- an integer `number`
+- a floating point `number`
+
+If a string or floating point number is given, the precision is inferred.
 
 And don't forget: once a decimal, always a decimal!
-
 Best to keep decimals as decimals forever. You'll only lose precision
 converting to numbers.
 
@@ -55,10 +57,6 @@ forth, there's not much point in using this
 ### .toString() => string
 
 Provides the canonical string representation
-
-### .tuple => [digits, precision]
-
-Provides the internal storage
 
 ### .precision(n) => Decimal
 

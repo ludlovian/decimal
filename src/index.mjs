@@ -105,7 +105,7 @@ function parseNumber (n, minp, maxp) {
     s = n.toString()
   } else if (typeof n === 'string') {
     s = n
-    n = parseFloat(s)
+    n = Number(s)
   } else {
     throw new TypeError('Invalid number: ' + n)
   }

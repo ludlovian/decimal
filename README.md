@@ -9,6 +9,8 @@ All I want is something to manage my financial data, without losing
 pennies in rounding, or requiring me to multiply & divide by 100 all
 the time. That's it.
 
+Okay, that's not just it. I also wanted to play with the new `BigInt`.
+
 ## API
 
 ### decimal(input, { minPrecision, maxPrecision }) => Decimal
@@ -18,38 +20,50 @@ import decimal from 'decimal'
 const d = decimal(1.234)
 ```
 
-The sole default export is a function to create a decimal from another number.
+The sole default export is a function to create a decimal.
 
-A decimal is immutable and stored as an integer representing the digits, and an exponent
-representing the precision. So `1.23` would be stored as `123` and `2`. And
-is different from `1.230`, which is stored as `1230` and `3`. Geddit?
+A decimal is effectively an immutable integer scaled by 10^-precision.
+So it is represented by two items:
+a`BigInt` for the integer, and a number for the precision.
 
-The `decimal` function can take an existing decimal (which it just returns), or
-can create one from a primitive number, or a string representation,
-or a tuple of `[digits, exponent]`.
+So `1.23` would be stored as `[123n, 2]` and `1.230` (same number, different
+precision) would be stored as `[1230n, 3]`.
 
-This is limited to exponents between 0 and 12 inclusive, error checking
-is minimal and we do not cope with very large or very small numbers.
+You can create a decimal by supplying:
+- an existing decimal (which is just returned)
+- a string representation - which is the preferred way to store & retrieve them.
+- an existing primitive number
+- tuple of `[digits, precision]` if you want to fiddle.
 
-But by the time my finances are either that large or that small,
-I'll have other problems.
+And don't forget: once a decimal, always a decimal!
 
-### .number => number
+Best to keep decimals as decimals forever. You'll only lose precision
+converting to numbers.
 
-Used to convert back to a primitive number.
+There really isn't much error checking. It assumes you know what you are doing.
+
+### decimal.isDecimal(d)
+
+Tells you if something is already a decimal.
+
+### .toNumber() => number
+
+Converts back to a primitive number, but possibly loss of precision.
+Try not to use this much. If you are going to keep coercing back and
+forth, there's not much point in using this
 
 ### .toString() => string
 
 Provides the canonical string representation
 
-### .tuple => [digits, exponent]
+### .tuple => [digits, precision]
 
 Provides the internal storage
 
 ### .precision(n) => Decimal
 
 Creates a new decimal from this, but with the new precision. If precision is reduced, then
-rounding takes place. We just round the one regular way (nearest int, half upwards).
+rounding takes place. We just round the one regular way (half away from zero).
 
 ### .add(other) => Decimal
 

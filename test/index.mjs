@@ -18,8 +18,6 @@ test('construction', () => {
 
   const x = decimal(12.34)
   assert.is(decimal(x), x, 'pre-converted passed thru')
-
-  assert.is(decimal([12340n, 3]).toString(), '12.340', 'constructed from tuple')
 })
 
 test('isDecimal', () => {
@@ -48,8 +46,6 @@ test('representation', () => {
   assert.is(x.toJSON(), x.toString())
 
   assert.is(inspect(x), 'Decimal { 12.340 }')
-
-  assert.is(x.tuple[1], 3)
 })
 
 test('change precision', () => {
@@ -269,6 +265,40 @@ test('eq', () => {
     decimal('1.230').eq('1.22'),
     false,
     'compare with different decimal of smaller precision'
+  )
+})
+
+test('normalise', () => {
+  assert.is(
+    decimal('1.23000')
+      .normalise()
+      .toString(),
+    '1.23',
+    'removes trailing zeros'
+  )
+
+  assert.is(
+    decimal('-1.23000')
+      .normalise()
+      .toString(),
+    '-1.23',
+    'removes trailing zeros on negative number'
+  )
+
+  assert.is(
+    decimal('1230.000')
+      .normalise()
+      .toString(),
+    '1230',
+    'does not remove zeros left of decimal point'
+  )
+
+  assert.is(
+    decimal('0.00000')
+      .normalise()
+      .toString(),
+    '0',
+    'normlises zero'
   )
 })
 

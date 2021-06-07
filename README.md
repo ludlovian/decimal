@@ -99,3 +99,8 @@ Is this decimal equal to another
 
 Compares one decimal with another and says whether this is less than (-1)
 the other, equal (0) to the other, or more than (+1) the other.
+
+### .normalise() => Decimal
+
+Reduces the precision to the lowest level possible - in other words,
+it clears out trailing zeros.

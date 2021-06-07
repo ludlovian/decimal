@@ -1,13 +1,18 @@
 import { inspect } from 'util'
-const DIGS = Symbol('digits')
-const PREC = Symbol('precision')
+
+const sgn = d => d >= 0n
+const abs = d => (sgn(d) ? d : -d)
+const div = (x, y) => {
+  const s = sgn(x) ? sgn(y) : !sgn(y)
+  x = abs(x)
+  y = abs(y)
+  const r = x % y
+  const n = x / y + (r * 2n >= y ? 1n : 0n)
+  return s ? n : -n
+}
 
 export default function decimal (number, opts = {}) {
   if (number instanceof Decimal) return number
-  if (Array.isArray(number)) {
-    const [digs, prec] = number
-    return new Decimal(BigInt(digs), prec)
-  }
   const [d, p] = parseNumber(number)
   return new Decimal(d, p)
 }
@@ -18,12 +23,9 @@ decimal.isDecimal = function isDecimal (d) {
 
 class Decimal {
   constructor (digs, prec) {
-    Object.freeze(
-      Object.defineProperties(this, {
-        [DIGS]: { value: digs },
-        [PREC]: { value: prec }
-      })
-    )
+    this._d = digs
+    this._p = prec
+    Object.freeze(this)
   }
 
   [inspect.custom] (depth, opts) {
@@ -32,22 +34,18 @@ class Decimal {
     return `Decimal { ${opts.stylize(this.toString(), 'number')} }`
   }
 
-  get tuple () {
-    return [this[DIGS], this[PREC]]
-  }
-
   toNumber () {
-    const factor = getFactor(this[PREC])
-    return Number(this[DIGS]) / Number(factor)
+    const factor = getFactor(this._p)
+    return Number(this._d) / Number(factor)
   }
 
   toString () {
-    const neg = this[DIGS] < 0n
-    const p = this[PREC]
-    const d = this[DIGS]
-    let s = (neg ? -d : d).toString().padStart(p + 1, '0')
-    if (p) s = s.slice(0, -p) + '.' + s.slice(-p)
-    return neg ? '-' + s : s
+    const s = sgn(this._d)
+    const p = this._p
+    const d = abs(this._d)
+    let t = d.toString().padStart(p + 1, '0')
+    if (p) t = t.slice(0, -p) + '.' + t.slice(-p)
+    return s ? t : '-' + t
   }
 
   toJSON () {
@@ -55,26 +53,26 @@ class Decimal {
   }
 
   precision (p) {
-    const prec = this[PREC]
+    const prec = this._p
     if (prec === p) return this
     if (p > prec) {
       const f = getFactor(p - prec)
-      return new Decimal(this[DIGS] * f, p)
+      return new Decimal(this._d * f, p)
     } else {
       const f = getFactor(prec - p)
-      return new Decimal(roundedDiv(this[DIGS], f), p)
+      return new Decimal(div(this._d, f), p)
     }
   }
 
   neg () {
-    return new Decimal(-this[DIGS], this[PREC])
+    return new Decimal(-this._d, this._p)
   }
 
   add (other) {
     other = decimal(other)
-    if (other[PREC] > this[PREC]) return other.add(this)
-    other = other.precision(this[PREC])
-    return new Decimal(this[DIGS] + other[DIGS], this[PREC])
+    if (other._p > this._p) return other.add(this)
+    other = other.precision(this._p)
+    return new Decimal(this._d + other._d, this._p)
   }
 
   sub (other) {
@@ -85,32 +83,42 @@ class Decimal {
   mul (other) {
     other = decimal(other)
     // x*10^-a * y*10^-b = xy*10^-(a+b)
-    const p = this[PREC] + other[PREC]
-    const d = this[DIGS] * other[DIGS]
-    return new Decimal(d, p).precision(this[PREC])
+    const p = this._p + other._p
+    const d = this._d * other._d
+    return new Decimal(d, p).precision(this._p)
   }
 
   div (other) {
     other = decimal(other)
     // x*10^-a / y*10^-b = (x/y)*10^-(a-b)
-    const d = roundedDiv(this[DIGS] * getFactor(other[PREC]), other[DIGS])
-    return new Decimal(d, this[PREC])
+    const d = div(this._d * getFactor(other._p), other._d)
+    return new Decimal(d, this._p)
   }
 
   abs () {
-    if (this[DIGS] >= 0n) return this
-    return new Decimal(-this[DIGS], this[PREC])
+    if (sgn(this._d)) return this
+    return new Decimal(-this._d, this._p)
   }
 
   cmp (other) {
     other = decimal(other)
-    if (this[PREC] < other[PREC]) return -other.cmp(this) || 0
-    other = other.precision(this[PREC])
-    return this[DIGS] < other[DIGS] ? -1 : this[DIGS] > other[DIGS] ? 1 : 0
+    if (this._p < other._p) return -other.cmp(this) || 0
+    other = other.precision(this._p)
+    return this._d < other._d ? -1 : this._d > other._d ? 1 : 0
   }
 
   eq (other) {
     return this.cmp(other) === 0
+  }
+
+  normalise () {
+    if (this._d === 0n) return this.precision(0)
+    for (let i = 0; i < this._p; i++) {
+      if (this._d % getFactor(i + 1) !== 0n) {
+        return this.precision(this._p - i)
+      }
+    }
+    return this.precision(0)
   }
 }
 
@@ -136,16 +144,4 @@ function parseNumber (x) {
     }
   }
   throw new TypeError('Invalid number: ' + x)
-}
-
-function roundedDiv (x, y) {
-  if (y === 0n) throw new RangeError('Divide by zero')
-  const xneg = x < 0n
-  const yneg = y < 0n
-  const neg = yneg ? !xneg : xneg
-  x = xneg ? -x : x
-  y = yneg ? -y : y
-  const r = x % y
-  const n = x / y + (r * 2n >= y ? 1n : 0n)
-  return neg ? -n : n
 }

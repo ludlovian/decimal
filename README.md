@@ -13,7 +13,7 @@ Okay, that's not just it. I also wanted to play with the new `BigInt`.
 
 ## API
 
-### decimal(input, { minPrecision, maxPrecision }) => Decimal
+### decimal(input) => Decimal
 ```
 import decimal from 'decimal'
 

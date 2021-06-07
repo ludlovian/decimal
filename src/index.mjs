@@ -71,36 +71,30 @@ class Decimal {
   }
 
   add (other) {
-    let x = this
-    let y = decimal(other)
-    const xp = x[PREC]
-    const yp = y[PREC]
-    const p = xp > yp ? xp : yp
-    x = x.precision(p)
-    y = y.precision(p)
-    return new Decimal(x[DIGS] + y[DIGS], p)
+    other = decimal(other)
+    if (other[PREC] > this[PREC]) return other.add(this)
+    other = other.precision(this[PREC])
+    return new Decimal(this[DIGS] + other[DIGS], this[PREC])
   }
 
   sub (other) {
     other = decimal(other)
-    return this.add(decimal(other).neg())
+    return this.add(other.neg())
   }
 
   mul (other) {
+    other = decimal(other)
     // x*10^-a * y*10^-b = xy*10^-(a+b)
-    const x = this
-    const y = decimal(other)
-    const p = x[PREC] + y[PREC]
-    const d = x[DIGS] * y[DIGS]
+    const p = this[PREC] + other[PREC]
+    const d = this[DIGS] * other[DIGS]
     return new Decimal(d, p).precision(this[PREC])
   }
 
   div (other) {
+    other = decimal(other)
     // x*10^-a / y*10^-b = (x/y)*10^-(a-b)
-    const x = this
-    const y = decimal(other)
-    const d = roundedDiv(x[DIGS] * getFactor(y[PREC]), y[DIGS])
-    return new Decimal(d, x[PREC])
+    const d = roundedDiv(this[DIGS] * getFactor(other[PREC]), other[DIGS])
+    return new Decimal(d, this[PREC])
   }
 
   abs () {

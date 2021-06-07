@@ -5,40 +5,31 @@ import { inspect } from 'util'
 
 import decimal from '../src/index.mjs'
 
-function asJSON (x) {
-  const [digits, precision] = x.tuple
-  return { digits, precision }
-}
-
 test('construction', () => {
-  assert.equal(
-    asJSON(decimal(12.34)),
-    { digits: 1234, precision: 2 },
-    'implied precision from number'
-  )
+  assert.equal(decimal(12.34).tuple, [1234, 2], 'implied precision from number')
 
   assert.equal(
-    asJSON(decimal(12.34, { minPrecision: 3 })),
-    { digits: 12340, precision: 3 },
+    decimal(12.34, { minPrecision: 3 }).tuple,
+    [12340, 3],
     'min precision from number'
   )
 
   assert.equal(
-    asJSON(decimal('12.340')),
-    { digits: 12340, precision: 3 },
+    decimal('12.340').tuple,
+    [12340, 3],
     'implied precision from string'
   )
 
   assert.equal(
-    asJSON(decimal('12.34', { minPrecision: 3 })),
-    { digits: 12340, precision: 3 },
+    decimal('12.34', { minPrecision: 3 }).tuple,
+    [12340, 3],
     'min precision from string'
   )
 
   const x = decimal(12.34)
   assert.is(decimal(x), x, 'pre-converted passed thru')
 
-  assert.equal(asJSON(decimal([12340, 3])), { digits: 12340, precision: 3 })
+  assert.equal(decimal([12340, 3]).tuple, [12340, 3])
 })
 
 test('errors in construction', () => {
@@ -71,52 +62,52 @@ test('representation', () => {
 
 test('change precision', () => {
   assert.equal(
-    asJSON(decimal(12.34).precision(3)),
-    { digits: 12340, precision: 3 },
+    decimal(12.34).precision(3).tuple,
+    [12340, 3],
     'increase precision'
   )
 
   assert.equal(
-    asJSON(decimal(12.345).precision(2)),
-    { digits: 1235, precision: 2 },
+    decimal(12.345).precision(2).tuple,
+    [1235, 2],
     'decrease precision'
   )
 })
 
 test('add', () => {
   assert.equal(
-    asJSON(decimal(12.34).add('34.567')),
-    { digits: 46907, precision: 3 },
+    decimal(12.34).add('34.567').tuple,
+    [46907, 3],
     'add with larger precision'
   )
 
   assert.equal(
-    asJSON(decimal(12.345).add('34.5')),
-    { digits: 46845, precision: 3 },
+    decimal(12.345).add('34.5').tuple,
+    [46845, 3],
     'add with smaller precision'
   )
 })
 
 test('sub', () => {
   assert.equal(
-    asJSON(decimal(67.89).sub('12.345')),
-    { digits: 55545, precision: 3 },
+    decimal(67.89).sub('12.345').tuple,
+    [55545, 3],
     'sub with larger precision'
   )
 
   assert.equal(
-    asJSON(decimal(56.789).sub('23.4')),
-    { digits: 33389, precision: 3 },
+    decimal(56.789).sub('23.4').tuple,
+    [33389, 3],
     'sub with smaller precision'
   )
 })
 
 test('mul', () => {
-  assert.equal(asJSON(decimal(12.34).mul(3.7)), { digits: 4566, precision: 2 })
+  assert.equal(decimal(12.34).mul(3.7).tuple, [4566, 2])
 })
 
 test('div', () => {
-  assert.equal(asJSON(decimal(87.65).div(2.7)), { digits: 3246, precision: 2 })
+  assert.equal(decimal(87.65).div(2.7).tuple, [3246, 2])
 
   assert.throws(() => decimal(2).div('0'))
 })

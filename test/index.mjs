@@ -216,4 +216,60 @@ test('abs  & neg', () => {
   )
 })
 
+test('cmp', () => {
+  assert.is(
+    decimal('1.23').cmp('1.231'),
+    -1,
+    'compare with larger decimal of greater precision'
+  )
+  assert.is(
+    decimal('1.23').cmp('1.229'),
+    1,
+    'compare with smaller decimal of greater precision'
+  )
+  assert.is(
+    decimal('1.23').cmp('1.230'),
+    0,
+    'compare with same decimal of greater precision'
+  )
+  assert.is(
+    decimal('1.23').cmp('1.3'),
+    -1,
+    'compare with larger decimal of smaller precision'
+  )
+  assert.is(
+    decimal('1.23').cmp('1.2'),
+    1,
+    'compare with smaller decimal of smaller precision'
+  )
+  assert.is(
+    decimal('1.230').cmp('1.23'),
+    0,
+    'compare with same decimal of smaller precision'
+  )
+})
+
+test('eq', () => {
+  assert.is(
+    decimal('1.23').eq('1.230'),
+    true,
+    'compare with same decimal of larger precision'
+  )
+  assert.is(
+    decimal('1.23').eq('1.220'),
+    false,
+    'compare with different decimal of larger precision'
+  )
+  assert.is(
+    decimal('1.230').eq('1.23'),
+    true,
+    'compare with same decimal of smaller precision'
+  )
+  assert.is(
+    decimal('1.230').eq('1.22'),
+    false,
+    'compare with different decimal of smaller precision'
+  )
+})
+
 test.run()

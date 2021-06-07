@@ -101,6 +101,17 @@ class Decimal {
     if (this[DIGS] >= 0n) return this
     return new Decimal(-this[DIGS], this[PREC])
   }
+
+  cmp (other) {
+    other = decimal(other)
+    if (this[PREC] < other[PREC]) return -other.cmp(this) || 0
+    other = other.precision(this[PREC])
+    return this[DIGS] < other[DIGS] ? -1 : this[DIGS] > other[DIGS] ? 1 : 0
+  }
+
+  eq (other) {
+    return this.cmp(other) === 0
+  }
 }
 
 const factors = []

@@ -90,3 +90,12 @@ Creates a new decimal which is the absolute value of this one.
 ### .neg() => Decimal
 
 Creates a new decimal which is the negation of this one.
+
+### .eq(other) => Boolean
+
+Is this decimal equal to another
+
+### .cmp(other) => -1|0|+1
+
+Compares one decimal with another and says whether this is less than (-1)
+the other, equal (0) to the other, or more than (+1) the other.

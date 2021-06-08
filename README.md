@@ -26,6 +26,9 @@ A decimal is effectively an immutable integer scaled by 10^-precision.
 So it is represented by two items:
 a signed `BigInt` for the integer, and a number for the precision.
 
+If `BigInt` is not available, it just uses a regular `Number`, but obviously
+then the size is limited to `Number.MAX_SAFE_INTEGER`.
+
 So `1.23` would be stored as `123n` and `2` and `1.230` (same number, different
 precision) would be stored as `1230n` and `3`.
 
@@ -58,10 +61,12 @@ forth, there's not much point in using this
 
 Provides the canonical string representation
 
-### .precision(n) => Decimal
+### .withPrecision(n) => Decimal
 
 Creates a new decimal from this, but with the new precision. If precision is reduced, then
 rounding takes place. We just round the one regular way (half away from zero).
+
+Also available with the synonyms `withPrec` and `withDP`.
 
 ### .add(other) => Decimal
 

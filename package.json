@@ -1,11 +1,11 @@
 {
   "name": "decimal",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Barebones decimal library",
   "main": "src/index.mjs",
   "exports": {
-      ".": "./src/index.mjs",
-      "./no-bigint": "./src/no-bigint.mjs"
+    ".": "./src/index.mjs",
+    "./no-bigint": "./src/no-bigint.mjs"
   },
   "scripts": {
     "clean": "rm -rf coverage/ node_modules/.cache/",

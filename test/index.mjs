@@ -24,6 +24,27 @@ test('construction', () => {
   assert.is(decimal(x), x, 'pre-converted passed thru')
 })
 
+test('construction from parts', () => {
+  assert.is(
+    decimal.from({ digits: 123, precision: 1 }).toString(),
+    '12.3',
+    'created from digits and precision'
+  )
+
+  assert.is(
+    decimal.from({ digits: 1234, factor: 100 }).toString(),
+    '12.34',
+    'created from digits and factor'
+  )
+})
+
+test('extract parts', () => {
+  const d = decimal('123.450')
+  assert.is(d.digits, 123450n)
+  assert.is(d.precision, 3)
+  assert.is(d.factor, 1000n)
+})
+
 test('isDecimal', () => {
   assert.is(decimal.isDecimal(decimal(1)), true)
   assert.is(decimal.isDecimal({}), false)
@@ -41,7 +62,7 @@ test('errors in construction', () => {
 })
 
 test('representation', () => {
-  const x = decimal(12.34).precision(3)
+  const x = decimal(12.34).withPrecision(3)
 
   assert.is(x.toNumber(), 12.34)
   assert.is(x.toString(), '12.340')
@@ -54,7 +75,7 @@ test('representation', () => {
 test('change precision', () => {
   assert.is(
     decimal('12.345')
-      .precision(3)
+      .withPrecision(3)
       .toString(),
     '12.345',
     'no change in precision'
@@ -62,7 +83,7 @@ test('change precision', () => {
 
   assert.is(
     decimal(12.34)
-      .precision(3)
+      .withPrecision(3)
       .toString(),
     '12.340',
     'increase precision'
@@ -70,7 +91,7 @@ test('change precision', () => {
 
   assert.is(
     decimal(12.345)
-      .precision(2)
+      .withPrecision(2)
       .toString(),
     '12.35',
     'decrease precision and round up'
@@ -78,7 +99,7 @@ test('change precision', () => {
 
   assert.is(
     decimal(12.345)
-      .precision(1)
+      .withPrecision(1)
       .toString(),
     '12.3',
     'decrease precision and no rounding'
@@ -86,8 +107,8 @@ test('change precision', () => {
 
   assert.is(
     decimal(12.345)
-      .precision(2)
-      .precision(1)
+      .withPrecision(2)
+      .withPrecision(1)
       .toString(),
     '12.4',
     'decrease and round up twice'
@@ -95,7 +116,7 @@ test('change precision', () => {
 
   assert.is(
     decimal('-1.2345')
-      .precision(3)
+      .withPrecision(3)
       .toString(),
     '-1.235',
     'negative round away from zero'
@@ -103,7 +124,7 @@ test('change precision', () => {
 
   assert.is(
     decimal('-1.2345')
-      .precision(2)
+      .withPrecision(2)
       .toString(),
     '-1.23',
     'negative no rounding'

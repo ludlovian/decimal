@@ -1,10 +1,11 @@
 const customInspect = Symbol.for('nodejs.util.inspect.custom')
 const div = (x, y) => {
-  const pos = x >= 0n ? y > 0n : y < 0n
-  x = x < 0n ? -x : x
-  y = y < 0n ? -y : y
+  const pos = x >= 0 ? y > 0 : y < 0
+  x = x < 0 ? -x : x
+  y = y < 0 ? -y : y
+  if (y === 0) throw new Error('Divide by zero')
   const r = x % y
-  const n = x / y + (r * 2n >= y ? 1n : 0n)
+  const n = Math.floor(x / y) + (r * 2 >= y ? 1 : 0)
   return pos ? n : -n
 }
 /* c8 ignore next */
@@ -18,9 +19,8 @@ const synonyms = {
 
 export default function decimal (x, opts = {}) {
   if (x instanceof Decimal) return x
-  if (typeof x === 'bigint') return new Decimal(x, 0)
   if (typeof x === 'number') {
-    if (Number.isInteger(x)) return new Decimal(BigInt(x), 0)
+    if (Number.isInteger(x)) return new Decimal(x, 0)
     x = x.toString()
   }
   if (typeof x !== 'string') throw new TypeError('Invalid number: ' + x)
@@ -28,9 +28,9 @@ export default function decimal (x, opts = {}) {
   const i = x.indexOf('.')
   if (i > -1) {
     x = x.replace('.', '')
-    return new Decimal(BigInt(x), x.length - i)
+    return new Decimal(Number(x), x.length - i)
   } else {
-    return new Decimal(BigInt(x), 0)
+    return new Decimal(Number(x), 0)
   }
 }
 decimal.from = function from ({ digits, precision, factor }) {
@@ -38,7 +38,7 @@ decimal.from = function from ({ digits, precision, factor }) {
     precision = 0
     while (getFactor(precision) < factor) precision++
   }
-  return new Decimal(BigInt(digits), precision)
+  return new Decimal(digits, precision)
 }
 
 decimal.isDecimal = function isDecimal (d) {
@@ -72,11 +72,11 @@ class Decimal {
 
   toNumber () {
     const factor = getFactor(this._p)
-    return Number(this._d) / Number(factor)
+    return this._d / factor
   }
 
   toString () {
-    const neg = this._d < 0n
+    const neg = this._d < 0
     const p = this._p
     const d = neg ? -this._d : this._d
     let t = d.toString().padStart(p + 1, '0')
@@ -127,7 +127,7 @@ class Decimal {
   }
 
   abs () {
-    if (this._d >= 0n) return this
+    if (this._d >= 0) return this
     return new Decimal(-this._d, this._p)
   }
 
@@ -143,9 +143,9 @@ class Decimal {
   }
 
   normalise () {
-    if (this._d === 0n) return this.withPrecision(0)
+    if (this._d === 0) return this.withPrecision(0)
     for (let i = 0; i < this._p; i++) {
-      if (this._d % getFactor(i + 1) !== 0n) {
+      if (this._d % getFactor(i + 1) !== 0) {
         return this.withPrecision(this._p - i)
       }
     }
@@ -160,5 +160,5 @@ for (const k in synonyms) {
 const factors = []
 function getFactor (n) {
   n = Math.floor(n)
-  return n in factors ? factors[n] : (factors[n] = 10n ** BigInt(n))
+  return n in factors ? factors[n] : (factors[n] = 10 ** n)
 }

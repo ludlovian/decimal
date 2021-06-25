@@ -11,6 +11,11 @@ the time. That's it.
 
 Okay, that's not just it. I also wanted to play with the new `BigInt`.
 
+There are two export paths:
+
+- `decimal` provides the `BigInt` based implementation
+- `decimal/no-bigint` provides the `Number` based one
+
 ## API
 
 ### decimal(input) => Decimal
@@ -26,8 +31,8 @@ A decimal is effectively an immutable integer scaled by 10^-precision.
 So it is represented by two items:
 a signed `BigInt` for the integer, and a number for the precision.
 
-If `BigInt` is not available, it just uses a regular `Number`, but obviously
-then the size is limited to `Number.MAX_SAFE_INTEGER`.
+(The `no-bigint` version uses a regular `Number`,
+but obviously then the size is limited to `Number.MAX_SAFE_INTEGER`.)
 
 So `1.23` would be stored as `123n` and `2` and `1.230` (same number, different
 precision) would be stored as `1230n` and `3`.
@@ -35,7 +40,7 @@ precision) would be stored as `1230n` and `3`.
 You can create a decimal by supplying:
 - an existing decimal (which is just returned)
 - a string representation - which is the preferred way to store & retrieve them
-- a `bigint`
+- a `BigInt`
 - an integer `number`
 - a floating point `number`
 
@@ -50,6 +55,14 @@ There really isn't much error checking. It assumes you know what you are doing.
 ### decimal.isDecimal(d)
 
 Tells you if something is already a decimal.
+
+### decimal.from({ digits, factor, precision })
+
+Creates a decimal from digits and factor/precision.
+
+### .digits, .precision, .factor
+
+Provides the inside details
 
 ### .toNumber() => number
 

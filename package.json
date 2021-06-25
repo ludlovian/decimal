@@ -3,10 +3,14 @@
   "version": "2.3.0",
   "description": "Barebones decimal library",
   "main": "src/index.mjs",
+  "exports": {
+      ".": "./src/index.mjs",
+      "./no-bigint": "./src/no-bigint.mjs"
+  },
   "scripts": {
     "clean": "rm -rf coverage/ node_modules/.cache/",
-    "lint": "standard {src,test}/**/*.mjs|snazzy",
-    "format": "prettier-standard {src,test}/**/*.mjs",
+    "lint": "standard '{src,test}/**/*.mjs'|snazzy",
+    "format": "prettier-standard '{src,test}/**/*.mjs'",
     "test": "c8 uvu",
     "coverage": "npm run test && c8 report --reporter=html && sirv coverage/ -p 8000 -H"
   },

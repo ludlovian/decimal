@@ -25,6 +25,6 @@
   },
   "homepage": "https://github.com/ludlovian/decimal#readme",
   "devDependencies": {
-    "uvu": "^0.5.1"
+    "uvu": "^0.5.6"
   }
 }

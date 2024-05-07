@@ -8,7 +8,7 @@ const div = (x, y) => {
   return pos ? n : -n
 }
 /* c8 ignore next */
-const rgxNumber = /^-?\d+(?:\.\d+)?$/
+const rgxNumber = /^(-?\d+(?:\.\d+)?)(?:e([+-]\d+))?$/
 
 const synonyms = {
   withPrec: 'withPrecision',
@@ -20,11 +20,22 @@ export default function decimal (x, opts = {}) {
   if (x instanceof Decimal) return x
   if (typeof x === 'bigint') return new Decimal(x, 0)
   if (typeof x === 'number') {
-    if (Number.isInteger(x)) return new Decimal(BigInt(x), 0)
+    if (Number.isInteger(x) && x < Number.MAX_SAFE_INTEGER) {
+      return new Decimal(BigInt(x), 0)
+    }
     x = x.toString()
   }
   if (typeof x !== 'string') throw new TypeError('Invalid number: ' + x)
-  if (!rgxNumber.test(x)) throw new TypeError('Invalid number: ' + x)
+  const match = rgxNumber.exec(x)
+  if (!match) throw new TypeError('Invalid number: ' + x)
+  if (match[2] != null) {
+    const d = decimal(Number(match[1]))
+    const e = Number(match[2])
+    return e < 0
+      ? new Decimal(d.digits, d.precision - e)
+      : d.mul(getFactor(e)).normalise()
+  }
+  x = match[1]
   const i = x.indexOf('.')
   if (i > -1) {
     x = x.replace('.', '')

@@ -58,7 +58,6 @@ test('errors in construction', () => {
   assert.throws(() => decimal({ foo: 'bar' }))
   assert.throws(() => decimal('foo'))
   assert.throws(() => decimal('789foo'))
-  assert.throws(() => decimal(1e-10))
 })
 
 test('representation', () => {
@@ -323,6 +322,20 @@ test('normalise', () => {
       .toString(),
     '0',
     'normlises zero'
+  )
+})
+
+test('scientific', () => {
+  assert.is(
+    decimal(1.2345e-8).toString(),
+    '0.000000012345',
+    'Small scientific number'
+  )
+
+  assert.is(
+    decimal(1.2345e21).toString(),
+    '1234500000000000000000',
+    'Big scientific number'
   )
 })
 
